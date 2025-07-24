@@ -41,12 +41,24 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   filters?: FilterOption[];
+  totalCount?: number;
+  currentPage?: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  manualPagination?: boolean;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   filters,
+  totalCount,
+  currentPage = 1,
+  pageSize = 10,
+  onPageChange,
+  onPageSizeChange,
+  manualPagination = false,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -55,6 +67,20 @@ export function DataTable<TData, TValue>({
     [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  
+  const [pagination, setPagination] = React.useState({
+    pageIndex: manualPagination ? currentPage - 1 : 0,
+    pageSize: manualPagination ? pageSize : 10,
+  });
+
+  React.useEffect(() => {
+    if (manualPagination) {
+      setPagination({
+        pageIndex: currentPage - 1,
+        pageSize: pageSize,
+      });
+    }
+  }, [currentPage, pageSize, manualPagination]);
 
   const table = useReactTable({
     data,
@@ -64,12 +90,16 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination,
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
+    manualPagination,
+    pageCount: manualPagination && totalCount ? Math.ceil(totalCount / pageSize) : -1,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -81,7 +111,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       <DataTableToolbar table={table} filters={filters} />
-      <div className="rounded-md border">
+      <div className="rounded-md border max-h-[70vh] min-h-[70vh] overflow-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -129,7 +159,13 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <DataTablePagination 
+        table={table}
+        manualPagination={manualPagination}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+        totalCount={totalCount}
+      />
     </div>
   );
 }

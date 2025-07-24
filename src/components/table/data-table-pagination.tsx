@@ -22,20 +22,42 @@ import {
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
+  manualPagination?: boolean;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  totalCount?: number;
 }
 
 export function DataTablePagination<TData>({
   table,
+  manualPagination = false,
+  onPageChange,
+  onPageSizeChange,
+  totalCount,
 }: DataTablePaginationProps<TData>) {
   const [pageInput, setPageInput] = useState<string>("");
   const [isFirstPopoverOpen, setFirstPopoverOpen] = useState(false);
   const [isSecondPopoverOpen, setSecondPopoverOpen] = useState(false);
   const [secondPageInput, setSecondPageInput] = useState<string>("");
 
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const pageSize = table.getState().pagination.pageSize;
+  const totalPages = manualPagination && totalCount
+    ? Math.ceil(totalCount / pageSize)
+    : table.getPageCount();
+  const canPreviousPage = manualPagination ? currentPage > 1 : table.getCanPreviousPage();
+  const canNextPage = manualPagination ? currentPage < totalPages : table.getCanNextPage();
+
   const handleSetPage = () => {
     const pageIndex = Number(pageInput) - 1;
-    if (pageIndex >= 0 && pageIndex < table.getPageCount()) {
-      table.setPageIndex(pageIndex);
+    if (manualPagination && onPageChange) {
+      if (pageIndex >= 0 && pageIndex < (totalCount ? Math.ceil(totalCount / table.getState().pagination.pageSize) : table.getPageCount())) {
+        onPageChange(pageIndex + 1);
+      }
+    } else {
+      if (pageIndex >= 0 && pageIndex < table.getPageCount()) {
+        table.setPageIndex(pageIndex);
+      }
     }
     setPageInput("");
     setFirstPopoverOpen(false);
@@ -43,8 +65,14 @@ export function DataTablePagination<TData>({
 
   const handleSecondSetPage = () => {
     const pageIndex = Number(secondPageInput) - 1;
-    if (pageIndex >= 0 && pageIndex < table.getPageCount()) {
-      table.setPageIndex(pageIndex);
+    if (manualPagination && onPageChange) {
+      if (pageIndex >= 0 && pageIndex < (totalCount ? Math.ceil(totalCount / table.getState().pagination.pageSize) : table.getPageCount())) {
+        onPageChange(pageIndex + 1);
+      }
+    } else {
+      if (pageIndex >= 0 && pageIndex < table.getPageCount()) {
+        table.setPageIndex(pageIndex);
+      }
     }
     setSecondPageInput("");
     setSecondPopoverOpen(false);
@@ -57,7 +85,12 @@ export function DataTablePagination<TData>({
         <Select
           value={`${table.getState().pagination.pageSize}`}
           onValueChange={(value) => {
-            table.setPageSize(Number(value));
+            const newPageSize = Number(value);
+            if (manualPagination && onPageSizeChange) {
+              onPageSizeChange(newPageSize);
+            } else {
+              table.setPageSize(newPageSize);
+            }
           }}
         >
           <SelectTrigger className="h-8 w-[70px]">
@@ -71,16 +104,30 @@ export function DataTablePagination<TData>({
             ))}
           </SelectContent>
         </Select>
+      {totalCount && (
+        <div className="text-sm text-gray-600 mb-2">
+          Total products: {totalCount} (Page {currentPage} of {Math.ceil(totalCount / pageSize)})
+        </div>
+      )}
       </div>
+
 
       <div className="flex items-center gap-2">
         <Pagination>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={() => table.previousPage()}
+                onClick={() => {
+                  if (manualPagination && onPageChange) {
+                    if (canPreviousPage) {
+                      onPageChange(currentPage - 1);
+                    }
+                  } else {
+                    table.previousPage();
+                  }
+                }}
                 className={
-                  !table.getCanPreviousPage()
+                  !canPreviousPage
                     ? "pointer-events-none opacity-50"
                     : ""
                 }
@@ -88,11 +135,17 @@ export function DataTablePagination<TData>({
             </PaginationItem>
 
             {/* First page */}
-            {table.getPageCount() > 0 && (
+            {totalPages > 0 && (
               <PaginationItem>
                 <PaginationLink
                   isActive={table.getState().pagination.pageIndex === 0}
-                  onClick={() => table.setPageIndex(0)}
+                  onClick={() => {
+                    if (manualPagination && onPageChange) {
+                      onPageChange(1);
+                    } else {
+                      table.setPageIndex(0);
+                    }
+                  }}
                 >
                   1
                 </PaginationLink>
@@ -100,7 +153,7 @@ export function DataTablePagination<TData>({
             )}
 
             {/* First ellipsis */}
-            {table.getState().pagination.pageIndex > 2 && (
+            {table.getState().pagination.pageIndex > 2 && totalPages > 4 && (
               <PaginationItem>
                 <Popover
                   open={isFirstPopoverOpen}
@@ -133,29 +186,35 @@ export function DataTablePagination<TData>({
             )}
 
             {/* Current page and surrounding pages */}
-            {table.getPageCount() > 1 &&
-              Array.from({ length: Math.min(3, table.getPageCount() - 2) }).map(
+            {totalPages > 1 &&
+              Array.from({ length: Math.min(3, totalPages - 2) }).map(
                 (_, i) => {
                   const pageIndex = table.getState().pagination.pageIndex;
                   let page;
 
                   if (pageIndex <= 2) {
                     page = i + 1;
-                  } else if (pageIndex >= table.getPageCount() - 3) {
-                    page = table.getPageCount() - 3 + i;
+                  } else if (pageIndex >= totalPages - 3) {
+                    page = totalPages - 3 + i;
                   } else {
                     page = pageIndex - 1 + i;
                   }
 
                   // Skip if this would duplicate first or last page
-                  if (page === 0 || page === table.getPageCount() - 1)
+                  if (page === 0 || page === totalPages - 1)
                     return null;
 
                   return (
                     <PaginationItem key={page}>
                       <PaginationLink
                         isActive={pageIndex === page}
-                        onClick={() => table.setPageIndex(page)}
+                        onClick={() => {
+                          if (manualPagination && onPageChange) {
+                            onPageChange(page + 1);
+                          } else {
+                            table.setPageIndex(page);
+                          }
+                        }}
                       >
                         {page + 1}
                       </PaginationLink>
@@ -166,68 +225,82 @@ export function DataTablePagination<TData>({
 
             {/* Second ellipsis */}
             {table.getState().pagination.pageIndex <
-              table.getPageCount() - 3 && (
-              <PaginationItem>
-                <Popover
-                  open={isSecondPopoverOpen}
-                  onOpenChange={setSecondPopoverOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="h-9 w-9 cursor-pointer p-0"
-                    >
-                      <PaginationEllipsis />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-44 p-3">
-                    <div className="flex items-center space-x-2">
-                      <Input
-                        type="number"
-                        placeholder="Page"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleSecondSetPage();
-                          }
-                        }}
-                        value={secondPageInput}
-                        onChange={(e) => setSecondPageInput(e.target.value)}
-                        className="h-8"
-                      />
+              totalPages - 3 && totalPages > 4 && (
+                <PaginationItem>
+                  <Popover
+                    open={isSecondPopoverOpen}
+                    onOpenChange={setSecondPopoverOpen}
+                  >
+                    <PopoverTrigger asChild>
                       <Button
-                        size="sm"
-                        className="h-8"
-                        onClick={handleSecondSetPage}
+                        variant="outline"
+                        className="h-9 w-9 cursor-pointer p-0"
                       >
-                        Go
+                        <PaginationEllipsis />
                       </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </PaginationItem>
-            )}
+                    </PopoverTrigger>
+                    <PopoverContent className="w-44 p-3">
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          placeholder="Page"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleSecondSetPage();
+                            }
+                          }}
+                          value={secondPageInput}
+                          onChange={(e) => setSecondPageInput(e.target.value)}
+                          className="h-8"
+                        />
+                        <Button
+                          size="sm"
+                          className="h-8"
+                          onClick={handleSecondSetPage}
+                        >
+                          Go
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </PaginationItem>
+              )}
 
             {/* Last page */}
-            {table.getPageCount() > 1 && (
+            {totalPages > 1 && (
               <PaginationItem>
                 <PaginationLink
                   isActive={
                     table.getState().pagination.pageIndex ===
-                    table.getPageCount() - 1
+                    totalPages - 1
                   }
-                  onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                  onClick={() => {
+                    if (manualPagination && onPageChange) {
+                      onPageChange(totalPages);
+                    } else {
+                      table.setPageIndex(table.getPageCount() - 1);
+                    }
+                  }}
                 >
-                  {table.getPageCount()}
+                  {totalPages}
                 </PaginationLink>
               </PaginationItem>
             )}
 
             <PaginationItem>
               <PaginationNext
-                onClick={() => table.nextPage()}
+                onClick={() => {
+                  if (manualPagination && onPageChange) {
+                    if (canNextPage) {
+                      onPageChange(currentPage + 1);
+                    }
+                  } else {
+                    table.nextPage();
+                  }
+                }}
                 className={
-                  !table.getCanNextPage()
+                  !canNextPage
                     ? "pointer-events-none opacity-50"
                     : ""
                 }
