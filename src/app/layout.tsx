@@ -7,6 +7,7 @@ import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "@/components/theme-provider";
+import Navbar from "@/components/navbar";
 
 export const metadata: Metadata = {
   title: "FE task QuarbonaAI",
@@ -32,6 +33,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
+           <Navbar />
             <ToastContainer />
             <div className="h-screen max-h-screen overflow-hidden">
               {children}

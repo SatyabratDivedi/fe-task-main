@@ -3,7 +3,6 @@
 import { DataTable } from "@/components/table/data-table";
 import { productsColumns } from "@/components/table/data-table-row";
 import { useProducts } from "@/hooks/use-products";
-import Navbar from "@/components/navbar";
 import { useState } from "react";
 
 export default function HomePage() {
@@ -26,7 +25,6 @@ export default function HomePage() {
 
   return (
     <main className="">
-      <Navbar />
       <div className="container mx-auto py-8 ">
         {isLoading && (
           <div className="flex items-center justify-center p-8 max-h-[70vh] min-h-[70vh]">

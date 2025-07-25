@@ -15,6 +15,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useReactTable } from "@tanstack/react-table";
+import { useRouter } from "next/navigation";
 
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
@@ -47,9 +48,7 @@ interface DataTableProps<TData, TValue> {
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
   manualPagination?: boolean;
-}
-
-export function DataTable<TData, TValue>({
+}export function DataTable<TData, TValue>({
   columns,
   data,
   filters,
@@ -60,6 +59,7 @@ export function DataTable<TData, TValue>({
   onPageSizeChange,
   manualPagination = false,
 }: DataTableProps<TData, TValue>) {
+  const router = useRouter();
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -135,6 +135,13 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => {
+                    const product = row.original as { id: number };
+                    if (product?.id) {
+                      router.push(`/products/${product.id}`);
+                    }
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
