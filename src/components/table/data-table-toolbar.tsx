@@ -6,6 +6,7 @@ import { X } from "lucide-react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { DataTableViewOptions } from "./data-table-view-options"
+import { AddProductDialog } from "../add-product-dialog"
 
 interface FilterOption {
   columnId: string;
@@ -51,7 +52,10 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <div className="flex items-center space-x-2">
+        <AddProductDialog />
+        <DataTableViewOptions table={table} />
+      </div>
     </div>
   )
 }

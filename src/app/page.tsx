@@ -3,25 +3,9 @@
 import { DataTable } from "@/components/table/data-table";
 import { productsColumns } from "@/components/table/data-table-row";
 import { useProducts } from "@/hooks/use-products";
-import { useState } from "react";
 
 export default function HomePage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-
-  const { data, isLoading, error } = useProducts({
-    page: currentPage,
-    limit: pageSize,
-  });
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const handlePageSizeChange = (newPageSize: number) => {
-    setPageSize(newPageSize);
-    setCurrentPage(1);
-  };
+  const { data, isLoading, error } = useProducts();
 
   return (
     <main className="">
@@ -43,17 +27,12 @@ export default function HomePage() {
           </div>
         )}
 
-          {data && (
+        {data && (
           <div className="space-y-4">
             <DataTable 
               columns={productsColumns}
               data={data.products}
-              manualPagination={true}
               totalCount={data.total}
-              currentPage={currentPage}
-              pageSize={pageSize}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
             />
           </div>
         )}

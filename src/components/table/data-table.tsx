@@ -43,21 +43,11 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   filters?: FilterOption[];
   totalCount?: number;
-  currentPage?: number;
-  pageSize?: number;
-  onPageChange?: (page: number) => void;
-  onPageSizeChange?: (pageSize: number) => void;
-  manualPagination?: boolean;
 }export function DataTable<TData, TValue>({
   columns,
   data,
   filters,
   totalCount,
-  currentPage = 1,
-  pageSize = 10,
-  onPageChange,
-  onPageSizeChange,
-  manualPagination = false,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const [rowSelection, setRowSelection] = React.useState({});
@@ -69,18 +59,13 @@ interface DataTableProps<TData, TValue> {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   
   const [pagination, setPagination] = React.useState({
-    pageIndex: manualPagination ? currentPage - 1 : 0,
-    pageSize: manualPagination ? pageSize : 10,
+    pageIndex: 0,
+    pageSize: 10,
   });
 
   React.useEffect(() => {
-    if (manualPagination) {
-      setPagination({
-        pageIndex: currentPage - 1,
-        pageSize: pageSize,
-      });
-    }
-  }, [currentPage, pageSize, manualPagination]);
+    // No manual pagination needed - TanStack Table handles it automatically
+  }, []);
 
   const table = useReactTable({
     data,
@@ -98,8 +83,6 @@ interface DataTableProps<TData, TValue> {
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
-    manualPagination,
-    pageCount: manualPagination && totalCount ? Math.ceil(totalCount / pageSize) : -1,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -168,9 +151,6 @@ interface DataTableProps<TData, TValue> {
       </div>
       <DataTablePagination 
         table={table}
-        manualPagination={manualPagination}
-        onPageChange={onPageChange}
-        onPageSizeChange={onPageSizeChange}
         totalCount={totalCount}
       />
     </div>

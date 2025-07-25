@@ -21,7 +21,7 @@ interface LabelOption {
   value: string;
 }
 
-interface DataTableRowActionsProps<TData extends { label?: string }> {
+interface DataTableRowActionsProps<TData = unknown> {
   row: TData;
   labels?: LabelOption[];
   onDelete?: (task: TData) => void;
@@ -29,12 +29,12 @@ interface DataTableRowActionsProps<TData extends { label?: string }> {
   onLabelChange?: (task: TData, newLabel: string) => void;
 }
 
-export function DataTableRowActions<TData extends { label?: string | undefined; }>({
+export function DataTableRowActions<TData = unknown>({
   row,
   labels,
   onDelete,
   onEdit,
-  onLabelChange,
+  onLabelChange: _onLabelChange,
 }: DataTableRowActionsProps<TData>) {
   return (
     <DropdownMenu>
@@ -52,16 +52,13 @@ export function DataTableRowActions<TData extends { label?: string | undefined; 
         <DropdownMenuItem>Make a copy</DropdownMenuItem>
         <DropdownMenuItem>Favorite</DropdownMenuItem>
 
-        {labels && typeof row.label === "string" && (
+        {labels && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>Labels</DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
-                <DropdownMenuRadioGroup
-                  value={row.label}
-                  onValueChange={(value) => onLabelChange?.(row, value)}
-                >
+                <DropdownMenuRadioGroup>
                   {labels.map((label) => (
                     <DropdownMenuRadioItem
                       key={label.value}

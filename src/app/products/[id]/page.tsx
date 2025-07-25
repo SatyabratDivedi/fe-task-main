@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import Image from "next/image";
@@ -22,15 +22,49 @@ async function fetchProduct(id: string): Promise<Product> {
   return response.json() as Promise<Product>;
 }
 
+// Function to search for product in TanStack Query cache
+function findProductInCache(queryClient: ReturnType<typeof useQueryClient>, productId: string): Product | null {
+  const allProductsData = queryClient.getQueryData(["products", "all"]);
+  
+  if (!allProductsData || typeof allProductsData !== 'object' || !('products' in allProductsData)) {
+    return null;
+  }
+  const productsData = allProductsData as { products: Product[]; total: number };
+  
+  // Search for the product by ID
+  const foundProduct = productsData.products.find(
+    (product: Product) => product.id.toString() === productId
+  );
+  
+  if (foundProduct) {
+    return foundProduct;
+  }
+  
+  return null;
+}
+
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id } = use(params);
 
   const { data: product, isLoading, error } = useQuery({
     queryKey: ["product", id],
-    queryFn: () => fetchProduct(id),
+    queryFn: async () => {
+      try {
+        return await fetchProduct(id);
+      } catch (apiError) {
+        const cachedProduct = findProductInCache(queryClient, id);
+        if (cachedProduct) {
+          return cachedProduct;
+        }
+        
+        throw apiError;
+      }
+    },
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    retry: false,
   });
 
   if (isLoading) {

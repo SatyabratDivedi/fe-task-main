@@ -10,7 +10,7 @@ const config = {
       remotePatterns: [
          {
             protocol: "https",
-            hostname: "cdn.dummyjson.com",
+            hostname: "*",
             port: "",
             pathname: "/**",
          },
