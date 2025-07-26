@@ -1,3 +1,6 @@
+# Satyabrat Divedi
+- My Portfolio Website:- `https://skdivedi.me` 
+
 # Frontend Task: Product Table with API Integration, Zod Validation & Navigation
 
 ## Objective
