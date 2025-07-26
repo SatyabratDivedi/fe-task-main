@@ -16,6 +16,7 @@ import {
 } from "@tanstack/react-table";
 import { useReactTable } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
+import { useUrlPagination } from "@/hooks/use-url-pagination";
 
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
@@ -50,6 +51,8 @@ interface DataTableProps<TData, TValue> {
   totalCount,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
+  const { pagination, onPaginationChange } = useUrlPagination({ defaultPageSize: 10 });
+  
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -57,15 +60,6 @@ interface DataTableProps<TData, TValue> {
     [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  
-  const [pagination, setPagination] = React.useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
-  React.useEffect(() => {
-    // No manual pagination needed - TanStack Table handles it automatically
-  }, []);
 
   const table = useReactTable({
     data,
@@ -82,7 +76,7 @@ interface DataTableProps<TData, TValue> {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
+    onPaginationChange: onPaginationChange,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

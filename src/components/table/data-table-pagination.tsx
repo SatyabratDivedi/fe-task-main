@@ -84,7 +84,7 @@ export function DataTablePagination<TData>({
         </div>
         
         {totalCount && (
-          <div className="text-sm text-gray-600">
+          <div className="text-xs text-gray-500">
             Total products: {totalCount} (Page {currentPage} of {totalPages})
           </div>
         )}
