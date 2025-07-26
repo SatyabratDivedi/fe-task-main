@@ -2,6 +2,7 @@
 
 import { type Table } from "@tanstack/react-table"
 import { X } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
 
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
@@ -27,24 +28,49 @@ export function DataTableToolbar<TData>({
   table,
   filters = [],
 }: DataTableToolbarProps<TData>) {
+  const [searchValue, setSearchValue] = useState("")
+  const debounceRef = useRef<NodeJS.Timeout>()
   const isFiltered = table.getState().columnFilters.length > 0
+
+  const handleSearchChange = (value: string) => {
+    setSearchValue(value)
+    
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+    
+    debounceRef.current = setTimeout(() => {
+      table.getColumn("title")?.setFilterValue(value)
+    }, 500)
+  }
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
+  }, [])
 
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Filter tasks..."
-          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
-          }
+          placeholder="Filter products by title..."
+          value={searchValue}
+          onChange={(event) => handleSearchChange(event.target.value)}
           className="h-8 w-[150px] lg:w-[250px]"
         />
 
         {isFiltered && (
           <Button
             variant="ghost"
-            onClick={() => table.resetColumnFilters()}
+            onClick={() => {
+              table.resetColumnFilters()
+              setSearchValue("")
+              if (debounceRef.current) {
+                clearTimeout(debounceRef.current)
+              }
+            }}
             className="h-8 px-2 lg:px-3"
           >
             Reset
