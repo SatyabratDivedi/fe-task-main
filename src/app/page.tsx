@@ -13,10 +13,10 @@ function ProductsTable() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8 max-h-[70vh] min-h-[70vh]">
+      <div className="flex items-center justify-center p-4 sm:p-8 min-h-[50vh]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading products...</p>
+          <p className="text-sm sm:text-base">Loading products...</p>
         </div>
       </div>
     );
@@ -24,9 +24,9 @@ function ProductsTable() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center p-8 max-h-[70vh] min-h-[70vh]">
+      <div className="flex items-center justify-center p-4 sm:p-8 min-h-[50vh]">
         <div className="text-center text-red-500">
-          <p>Error loading products: {error.message}.</p>
+          <p className="text-sm sm:text-base">Error loading products: {error.message}.</p>
         </div>
       </div>
     );
@@ -34,7 +34,7 @@ function ProductsTable() {
 
   if (data) {
     return (
-      <div className="space-y-4">
+      <div className="w-full space-y-4">
         <DataTable 
           columns={productsColumns}
           data={data.products}
@@ -49,13 +49,13 @@ function ProductsTable() {
 
 export default function HomePage() {
   return (
-    <main className="">
-      <div className="container mx-auto py-8 ">
+    <main className=" w-full">
+      <div className="container mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <Suspense fallback={
-          <div className="flex items-center justify-center p-8 max-h-[70vh] min-h-[70vh]">
+          <div className="flex items-center justify-center p-4 sm:p-8 min-h-[50vh]">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Loading...</p>
+              <p className="text-sm sm:text-base">Loading...</p>
             </div>
           </div>
         }>

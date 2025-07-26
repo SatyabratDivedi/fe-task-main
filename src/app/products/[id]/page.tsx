@@ -19,7 +19,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = use(params);
 
   const { data: product, isLoading, error } = useProduct(id);
-  
+
   const title = product 
     ? `${product.title} – MyShop`
     : isLoading 
@@ -30,7 +30,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen overflow-auto">
+      <main className=" overflow-auto">
         <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center p-4 sm:p-8">
             <div className="text-center">
@@ -45,7 +45,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
 
   if (error || !product) {
     return (
-      <main className="min-h-screen overflow-auto">
+      <main className=" overflow-auto">
         <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center p-4 sm:p-8">
             <div className="text-center text-red-500">
@@ -66,8 +66,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   }
 
   return (
-    <main className="min-h-screen overflow-auto max-w-7xl mx-auto">
-      <div className="container mx-auto py-4 sm:py-6 md:py-8 px-4 sm:px-6 lg:px-8">
+    <main className=" w-full">
+      <div className="container mx-auto py-4 sm:py-6 md:py-8 px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* Back Button */}
         <Button
           onClick={() => router.back()}
@@ -79,16 +79,17 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
         </Button>
 
         {/* Product Detail */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-20">
-          <div className="space-y-4 flex flex-col items-end">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 xl:gap-20">
+          <div className="space-y-4 flex flex-col items-center lg:items-end">
             {/* Image */}
-            <div className="relative aspect-square rounded-lg overflow-hidden border w-[50%] mx-auto lg:mx-0">
+            <div className="relative aspect-square rounded-lg overflow-hidden border w-[50%]">
               <Image
                 src={product.thumbnail}
                 alt={product.title}
                 fill
                 className="object-cover"
                 priority
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 35vw"
               />
             </div>
           </div>
@@ -100,14 +101,14 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               <span className="text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400">
                 {product.category.toUpperCase()}
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1 leading-tight">
                 {product.title}
               </h1>
               {product.brand && (
-                <div className="text-base sm:text-lg text-gray-600 mt-1 dark:text-gray-400 flex items-center">
-                  by {product.brand}
+                <div className="text-sm sm:text-base lg:text-lg text-gray-600 mt-1 dark:text-gray-400 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                  <span>by {product.brand}</span>
                   {/* Rating */}
-                  <div className="flex items-center space-x-2 ml-1">
+                  <div className="flex items-center space-x-2">
                     <div className="flex items-center">
                       <Star className="h-4 w-4 sm:h-5 sm:w-5 fill-yellow-400 text-yellow-400" />
                       <span className="ml-1 text-sm font-medium">
@@ -125,8 +126,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             {/* Price */}
             <div className="space-y-2">
               <div className="flex items-center space-x-3">
-                <span className="text-2xl sm:text-3xl font-bold text-green-600">
-                  ${ product.price.toFixed(2)}
+                <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600">
+                  ${product.price.toFixed(2)}
                 </span>
               </div>
             </div>
