@@ -4,9 +4,12 @@ import { Suspense } from "react";
 import { DataTable } from "@/components/table/data-table";
 import { productsColumns } from "@/components/table/data-table-row";
 import { useProducts } from "@/hooks/use-products";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 function ProductsTable() {
   const { data, isLoading, error } = useProducts();
+  
+  useDocumentTitle("All Products – MyShop");
 
   if (isLoading) {
     return (

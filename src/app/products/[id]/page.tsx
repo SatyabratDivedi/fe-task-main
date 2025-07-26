@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowLeft, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProduct } from "@/hooks/use-product";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 
 interface ProductDetailPageProps {
   params: Promise<{
@@ -18,6 +19,14 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { id } = use(params);
 
   const { data: product, isLoading, error } = useProduct(id);
+  
+  const title = product 
+    ? `${product.title} – MyShop`
+    : isLoading 
+      ? "Loading Product – MyShop" 
+      : "Product Not Found – MyShop";
+  
+  useDocumentTitle(title);
 
   if (isLoading) {
     return (
@@ -55,8 +64,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       </main>
     );
   }
-
-  const discountedPrice = product.price * (1 - product.discountPercentage / 100);
 
   return (
     <main className="min-h-screen overflow-auto max-w-7xl mx-auto">

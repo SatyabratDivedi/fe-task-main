@@ -10,8 +10,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "@/components/navbar";
 
 export const metadata: Metadata = {
-  title: "FE task QuarbonaAI",
-  description: "fe task for QuarbonaAI",
+  title: "All Products – MyShop",
+  description: "All Products – MyShop",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
