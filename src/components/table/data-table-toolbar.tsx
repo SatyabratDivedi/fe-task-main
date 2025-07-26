@@ -29,7 +29,7 @@ export function DataTableToolbar<TData>({
   filters = [],
 }: DataTableToolbarProps<TData>) {
   const [searchValue, setSearchValue] = useState("")
-  const debounceRef = useRef<NodeJS.Timeout>()
+  const debounceRef = useRef<NodeJS.Timeout | null>(null)
   const isFiltered = table.getState().columnFilters.length > 0
 
   const handleSearchChange = (value: string) => {
