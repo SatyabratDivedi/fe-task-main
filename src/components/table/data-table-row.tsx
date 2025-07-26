@@ -88,9 +88,11 @@ export const productsColumns: ColumnDef<Product>[] = [
 		cell: ({ row }) => {
 			const product = row.original;
 			return (
-				<DataTableRowActions
-					row={product}
-				/>
+				<div onClick={(e) => e.stopPropagation()}>
+					<DataTableRowActions
+						row={product}
+					/>
+				</div>
 			);
 		},
 	},

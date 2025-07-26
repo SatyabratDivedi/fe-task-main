@@ -83,6 +83,7 @@ interface DataTableProps<TData, TValue> {
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    autoResetPageIndex: false,
   });
 
   return (

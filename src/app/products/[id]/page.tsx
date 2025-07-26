@@ -1,12 +1,11 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import Image from "next/image";
 import { ArrowLeft, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Product } from "@/types/product";
+import { useProduct } from "@/hooks/use-product";
 
 interface ProductDetailPageProps {
   params: Promise<{
@@ -14,58 +13,11 @@ interface ProductDetailPageProps {
   }>;
 }
 
-async function fetchProduct(id: string): Promise<Product> {
-  const response = await fetch(`https://dummyjson.com/products/${id}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch product");
-  }
-  return response.json() as Promise<Product>;
-}
-
-// Function to search for product in TanStack Query cache
-function findProductInCache(queryClient: ReturnType<typeof useQueryClient>, productId: string): Product | null {
-  const allProductsData = queryClient.getQueryData(["products", "all"]);
-  
-  if (!allProductsData || typeof allProductsData !== 'object' || !('products' in allProductsData)) {
-    return null;
-  }
-  const productsData = allProductsData as { products: Product[]; total: number };
-  
-  // Search for the product by ID
-  const foundProduct = productsData.products.find(
-    (product: Product) => product.id.toString() === productId
-  );
-  
-  if (foundProduct) {
-    return foundProduct;
-  }
-  
-  return null;
-}
-
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { id } = use(params);
 
-  const { data: product, isLoading, error } = useQuery({
-    queryKey: ["product", id],
-    queryFn: async () => {
-      try {
-        return await fetchProduct(id);
-      } catch (apiError) {
-        const cachedProduct = findProductInCache(queryClient, id);
-        if (cachedProduct) {
-          return cachedProduct;
-        }
-        
-        throw apiError;
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    retry: false,
-  });
+  const { data: product, isLoading, error } = useProduct(id);
 
   if (isLoading) {
     return (
@@ -167,7 +119,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             <div className="space-y-2">
               <div className="flex items-center space-x-3">
                 <span className="text-2xl sm:text-3xl font-bold text-green-600">
-                  ${discountedPrice.toFixed(2)}
+                  ${ product.price.toFixed(2)}
                 </span>
               </div>
             </div>

@@ -42,16 +42,11 @@ export function useUrlPagination({ defaultPageSize = 10 }: UsePaginationOptions 
     pageSize: getInitialPageSize(),
   });
 
-  // Update URL when pagination changes
   const updateUrl = useCallback((pageIndex: number, pageSize: number) => {
     const params = new URLSearchParams(searchParams.toString());
     
     const pageNumber = pageIndex + 1;
-    if (pageNumber === 1) {
-      params.delete("page");
-    } else {
-      params.set("page", pageNumber.toString());
-    }
+    params.set("page", pageNumber.toString());
     
     if (pageSize === defaultPageSize) {
       params.delete("size");
